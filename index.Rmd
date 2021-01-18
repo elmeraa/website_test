@@ -12,7 +12,7 @@ links:
     url: "mailto:elmera@ucsb.com"
 site: distill::distill_website
 output:
-  postcards::trestles
+  postcards::jolla
 ---
  
 Elmera is a 2019 graduate from the University of Utah with an Honors Bachelors of Science in Environmental Biology. Her honors thesis examined the effects of inorganic vs organic fertilizer on an urban lawn in Salt Lake City, Utah. She completed a  Science Undergraduate Lab Internship (SULI) at Lawrence Berkeley National Lab (LBNL) where she conducted research analyzing the effects of rainfall gradients on future gross primary productivity (GPP) across the Isthmus of Panama. Currently, she is attending UC, Santa Barbara's Bren School of Environmental Science and Management for her Masters. 
