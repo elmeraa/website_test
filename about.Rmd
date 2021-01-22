@@ -1,10 +1,14 @@
 ---
-title: "About this site"
+title: "About Me"
 description: |
   Some additional details about the website
+output: 
+  html_document: 
+    css: "learning-zone-template.css"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+~ Under construction ~
