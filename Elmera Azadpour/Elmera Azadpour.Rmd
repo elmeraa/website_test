@@ -1,0 +1,56 @@
+---
+name: Elmera
+surname: Azadpour
+position: "Masters Candidate"
+address: "Bren School of Environmental Science & Management"
+phone: +1 405 473 0828
+www: elmeraazadpour.com
+email: "elmera@ucsb.com"
+twitter: EAzadpour
+github: elmeraa
+date: "`r format(Sys.time(), '%B %Y')`"
+output: vitae::awesomecv
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(vitae)
+```
+
+# Education
+
+```{r}
+library(tibble)
+tribble(
+  ~ Degree, ~ Year, ~ Institution, ~ Where,
+  "Masters of Environmental Science and Management (MESM)", "Expected June 2022", "The Bren School of Environmental Science & Managements, University of California, Santa Barbara", "Santa Barbara, California", 
+  "Honors Bachelors of Science, Environmental Biology", "2016 - 2019", "University of Utah", "Salt Lake City, Utah"
+) %>% 
+  detailed_entries(Degree, Year, Institution, Where)
+```
+
+# Professional Experience
+
+```{r}
+tribble(
+  ~Year, ~Type, ~Desc,
+  1903, "Physics", "Awarded for her work on radioactivity with Pierre Curie and Henri Becquerel",
+  1911, "Chemistry", "Awarded for the discovery of radium and polonium"
+) %>% 
+  brief_entries(
+    glue::glue("Nobel Prize in {Type}"),
+    Year, 
+    Desc
+  )
+```
+
+# Publications
+
+```{r}
+library(dplyr)
+knitr::write_bib(c("vitae", "tibble"), "packages.bib")
+
+bibliography_entries("packages.bib") %>%
+  arrange(desc(author$family), issued)
+```
+

@@ -1,6 +1,6 @@
 name: "."
 title: "EA"
-theme: postcards.css
+theme: "postcards.css"
 description: |
   mfeo
 output_dir: "docs" 
@@ -10,4 +10,7 @@ navbar:
       href: index.html
     - text: "About"
       href: about.html
-output: distill::distill_article
+    - text: "Resume"
+      href: resume.html
+output: postcards::jolla
+
