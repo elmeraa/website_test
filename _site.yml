@@ -11,6 +11,6 @@ navbar:
     - text: "About"
       href: about.html
     - text: "Resume"
-      href: resume.html
+      href: Resume.html
 output: postcards::jolla
 
