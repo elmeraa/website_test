@@ -1,9 +1,11 @@
 ---
-theme: postcards.css
-links:
-  - label: Resume
-    url: "https://drive.google.com/file/d/1qMuFtHJ4Zjejj2-Kju-eTi-ew80Sy3mV/view"
-site: distill::distill_website
+title: Resume
+image: false
 output:
-  postcards::jolla
+  html_fragment: default
 ---
+
+<right>
+
+![Elmera's resume](Azadpour_Elmera_Resume_Jan2021.jpg){width=95%}
+</right>
