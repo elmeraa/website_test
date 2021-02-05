@@ -12,6 +12,8 @@ navbar:
       href: Research.html
     - text: "Resume"
       href: Resume.html
+    - text: "Blog"      # add
+      href: blog.html   # add
 output: postcards::trestles
 
 
