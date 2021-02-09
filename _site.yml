@@ -14,6 +14,6 @@ navbar:
       href: Resume.html
     - text: "Blog"      # add
       href: blog.html   # add
-output: postcards::trestles
+output: distill::distill_article
 
 
