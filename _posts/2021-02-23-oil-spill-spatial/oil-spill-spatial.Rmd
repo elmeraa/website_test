@@ -1,0 +1,77 @@
+---
+title: "Oil Spill: Spatial"
+description: |
+  Exploratory interactive maps showing the location of oil spill events from 2008 data from CA DFW Oil Spill Incident Tracking.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-02-23
+output:
+  distill::distill_article:
+    self_contained: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(tmap) # for interactive graph
+library(gstat) # for kriging
+library(stars) #grid for new location predictions
+```
+
+## Read in data
+```{r, warning=FALSE}
+ca_counties <- read_sf(here("_posts", "2021-02-23-oil-spill-spatial", "ca_counties"), layer = "CA_Counties_TIGER2016") %>% 
+  clean_names() %>% 
+  select(name)
+
+st_crs(ca_counties) # "EPSG",3857
+
+
+oil_spill <- read_sf(here("_posts", "2021-02-23-oil-spill-spatial", "oilspill"), layer = "Oil_Spill_Incident_Tracking_%5Bds394%5D") %>% 
+  clean_names()
+
+st_crs(oil_spill)  # "EPSG",3857
+
+```
+
+## exploratory interactive map in tmap showing the location of oil spill events included in the data
+```{r, warning=FALSE}
+ggplot() +
+  geom_sf(data = ca_counties) +
+  geom_sf(data = oil_spill, size = .5)
+```
+
+## Interactive map with tmap! 
+```{r}
+tmap_mode("view")
+
+tm_shape(oil_spill) + 
+  tm_dots()
+```
+
+
+## Static chloropleth map in ggplot in which the fill color for each county depends on the count of inland oil spill events by county for the 2008 oil spill data
+```{r, warning=FALSE}
+# oil_spill_inland <- oil_spill %>% 
+#   filter(inlandmari %in% c("Inland")) %>% 
+#   group_by(localecoun) %>% 
+#   summarise(count = n())
+
+county_oil <- ca_counties %>% 
+  st_join(oil_spill) %>% 
+   filter(inlandmari %in% c("Inland")) %>% 
+  group_by(localecoun) %>% 
+  summarise(count = n())
+  
+ggplot() +
+  geom_sf(data = ca_counties) +
+  geom_sf(data = county_oil, aes(fill = count)) +
+  theme_bw()+ 
+  scale_fill_gradient(low = "grey", high = "red") 
+```
+
+## Citation:
++ Oil spill data provided by: CA State Geoportal: Oil Sill Incident Tracking [ds394] https://gis.data.ca.gov/datasets/7464e3d6f4924b50ad06e5a553d71086_0/data

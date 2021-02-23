@@ -1,0 +1,153 @@
+---
+title: "Text wrangling and analysis"
+description: |
+   Counts and visualizations for the most frequently used words in "The Origin of Species" by Charles Darwin, 6th Edition.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-02-23
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+```
+
+## Read in the Origin of Species, 6th Edition by Darwin 
+```{r, warning=FALSE}
+os_text <- pdf_text(here("_posts", "2021-02-23-text-wrangling-and-analysis", "originofspecies6th-darwin.pdf"))
+```
+
+## Text into a data frame, then  wrangling with the tidyverse, break it up by chapter, and do some analyses.
+```{r, warning=FALSE}
+os_tidy <- data.frame(os_text) %>% 
+  mutate(text_full = str_split(os_text, pattern = '\\n')) %>% 
+  unnest(text_full) %>% 
+  mutate(text_full = str_trim(text_full))
+
+```
+
+```{r, warning=FALSE}
+os_df <- os_tidy %>% 
+  slice(-(1:184)) %>% 
+mutate(chapter = case_when(
+     str_detect(text_full, "CHAPTER") ~ str_extract(text_full, "CHAPTER [1-9]+"),
+     TRUE ~ NA_character_
+   )) %>% 
+  fill(chapter) %>% 
+  separate(col = chapter, into = c("cha", "no"), sep = " ") %>% 
+  mutate(chapter = as.numeric(no))
+```
+
+## Word count by Chapter
+```{r, warning=FALSE}
+os_tokens <- os_df %>% 
+  unnest_tokens(word, text_full) %>% 
+  select(-os_text) 
+
+os_tokens_clean <- os_tokens %>%
+   mutate(word = str_replace(word, "[0-9-]+", NA_character_)) %>% 
+  drop_na()
+
+os_wordcount <- os_tokens_clean %>% 
+  count(chapter, word) 
+```
+
+
+## Remove stop words and recounting again
+```{r, warning=FALSE}
+os_nonstop_words <- os_tokens_clean %>% 
+  anti_join(stop_words)
+
+nonstop_counts <- os_nonstop_words %>% 
+  count(chapter, word) 
+  
+```
+
+## Top 5 words by chapter
+```{r, warning=FALSE}
+top_5_words <- nonstop_counts %>% 
+  group_by(chapter) %>% 
+  arrange(-n) %>% 
+  slice(1:5)
+
+## vizualization
+ggplot( data = top_5_words,
+        aes(word,n )) +
+  geom_col(fill = "blue") +
+  facet_wrap(~chapter, scales = "free") +
+  coord_flip()
+```
+
+## Word cloud for all text
+```{r, warning=FALSE}
+nonstop_counts_full <- os_nonstop_words %>% 
+  count(word) 
+
+os_top100_removesps <- nonstop_counts_full %>% 
+  arrange(-n) %>% 
+  slice(1:100)
+
+os_cloud <- ggplot(data = os_top100_removesps, aes(label = word)) +
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle") +
+  scale_size_area(max_size = 12) +
+  scale_color_gradient(low = "darkseagreen", high = "forestgreen") +
+  theme_minimal()
+
+os_cloud
+
+#ggsave(here("src","originofspecies-wc-ea.png"), width = 8, height = 5) # to save
+```
+
+## Sentiment analysis using "NRC" lexicon
+```{r, warning=FALSE}
+## nrc to just check out
+os_nrc <- os_nonstop_words %>% 
+  inner_join(get_sentiments("nrc"))
+
+os_nrc_counts <- os_nrc %>% 
+  count(chapter, sentiment)
+
+ch_names <- list(
+  "1" ="Chapter 1",
+  "2" = "Chapter 2",
+  "3" = "Chapter 3",
+  "4" = "Chapter 4",
+  "5" = "Chapter 5",
+  "6" = "Chapter 6",
+  "7" = "Chapter 7",
+  "8" = "Chapter 8",
+  "9" = "Chapter 9",
+  "10" = "Chapter 10",
+  "11" = "Chapter 11",
+  "12" = "Chapter 12",
+  "13" = "Chapter 13",
+  "14" = "Chapter 14",
+  "15" = "Chapter 15"
+ )
+
+ch_labeller <- function(variable,value){
+  return(ch_names[value])
+}
+
+ggplot(data = os_nrc_counts, aes(x = sentiment, y = n)) +
+  geom_col() +
+  facet_wrap(~chapter, labeller=ch_labeller) +
+  coord_flip() +
+  theme_minimal() +
+  labs(y = "Word Count", x = "NRC sentiment", title = "Sentiment analysis of the Origin of Species by Charles Darwin\nusing NRC from Saif Mohammad and Peter Turney")
+  
+```
+
+
+## Citations:
++ NRC lexicon: Crowdsourcing a Word-Emotion Association Lexicon, Saif Mohammad and Peter Turney, Computational Intelligence, 29 (3), 436-465, 2013.
++ Origin of Species Text: https://laurieximenez.files.wordpress.com/2019/04/the-origin-of-species_charles-darwin.pdf

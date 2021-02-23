@@ -8,6 +8,8 @@ output:
       collapsed: false
       smooth_scroll: false
 ---
+![](azadpour-thesis.jpg)
+
 ## [Inorganic *vs.* organic fertilizer](https://collections.lib.utah.edu/ark:/87278/s6bk7290)
 
 <left>
