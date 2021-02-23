@@ -1,0 +1,90 @@
+---
+title: "Survey responses of political affiliation and recognition as an environmentalist with chi-square analysis"
+description: |
+  This script analyzes the association between respondents’ political affiliation (coined “conservative” or “liberal” by self-identification) and if they consider themself an environmentalist, followed by a chi-square test for independence.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-02-23
+output:
+  distill::distill_article:
+    self_contained: false
+---
+## Load packages
+```{r setup}
+library(tidyverse)
+library(here)
+library(janitor)
+library(broom)
+library(kableExtra)
+```
+
+## Introduction:
+This task analyzes the association between respondents’ political affiliation (coined “conservative” or “liberal” by self-identification) and if they consider themself an environmentalist. The variables in the dataset (conservation_survey.csv) I have used include:
+
+- env_id: response to survey statement "I consider myself an environmentalist," with outcomes 1 = Yes, 2 = No, 3 = Unsure
+- pol_or: response to survey question "How do you self-identify politically?" Response values 1 - 3 are “conservative” (strongly to slightly), and values 5 - 7 are “liberal” (slightly to strongly).
+
+```{r, error=FALSE, warning=FALSE}
+## Read in survey data 
+survey <- read_csv(here("_posts", "2021-02-23-chisquare-politcal", "conservation_survey.csv"))
+```
+
+```{r, error=FALSE, warning=FALSE}
+## only keep variables: 'env_id' and 'pol_or'
+survey_clean <- survey %>% 
+  clean_names() %>% 
+  select(env_id, pol_or) %>% 
+  mutate(party = case_when(
+    between(pol_or, 1,3) ~ "conservative",
+    between(pol_or, 5,7) ~ "liberal",
+    TRUE ~ NA_character_))
+
+survey_environmentalist <- survey_clean %>%  
+  mutate(environmentalist = case_when(
+   env_id == 1 ~ "yes",
+   env_id == 2 ~ "no",
+   env_id == 3 ~ "unsure"))
+```
+
+```{r, error=FALSE, warning=FALSE}
+## Finalized table that shows counts and proportions of "liberal" and "conservative" survey respondents who responded with "yes", "no" and "unsure" to the statement: "I consider myself an environmentalist"
+survey_counts <- survey_environmentalist %>% 
+  janitor::tabyl(party, environmentalist)
+
+survey_proportions <- survey_counts %>% 
+  adorn_percentages() %>% 
+  janitor::adorn_pct_formatting(digits = 2) %>% 
+  adorn_ns() %>% 
+  drop_na()
+
+survey_ct <- survey_proportions %>% 
+  column_to_rownames(var = "party")
+
+survey_ct %>%  
+  kable(col.names = c("No",
+                      "Unsure",
+                      "Yes"),
+    caption = "**Table 1**: Association between respondents’ political affiliation (“conservative” or “liberal” by self-identification) vs if they consider themself an environmentalist") %>% 
+  kable_styling(full_width = FALSE) 
+```
+
+```{r, error=FALSE, warning=FALSE}
+## Chi-square test
+survey_ct <- survey_counts %>%   
+  drop_na() %>% 
+  column_to_rownames(var = "party")
+  
+survey_x2 <- chisq.test(survey_ct)
+survey_x2
+
+survey_tidy <- tidy(survey_x2)
+```
+## Chi-square results and summary
+A chi-square test for independence compares two variables in a contingency table to see if they are related. In a more general sense, it tests to see whether distributions of categorical variables differ from each another. For this analysis, there is a significant association (i.e. non-independence) between political affiliation and and if a person considers themself an environmentalist ($\chi$^2^(`r survey_tidy$parameter`) = `r round(survey_tidy$statistic,2)`, *p*-value = `r format(survey_tidy$p.value, scientific = TRUE, digits = 3)`). 
+
+
+#### Citations:
++ Andrews Forest LTER Site and C. Batavia. 2019. Influences on charitable giving for conservation: Online survey data of 1,331 respondents across the US, August 2017 ver 3. Environmental Data Initiative. https://doi.org/10.6073/pasta/926e6270e324a1322a900da14d38b96c
+
++ Metadata, including survey questions and possible responses, are here: https://portal.edirepository.org/nis/metadataviewer?packageid=knb-lter-and.5444.3
