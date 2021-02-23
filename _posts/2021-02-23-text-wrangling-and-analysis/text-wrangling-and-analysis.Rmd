@@ -98,7 +98,7 @@ os_top100_removesps <- nonstop_counts_full %>%
 
 os_cloud <- ggplot(data = os_top100_removesps, aes(label = word)) +
   geom_text_wordcloud(aes(color = n, size = n), shape = "circle") +
-  scale_size_area(max_size = 12) +
+  scale_size_area(max_size = 10) +
   scale_color_gradient(low = "darkseagreen", high = "forestgreen") +
   theme_minimal()
 
