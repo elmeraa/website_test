@@ -1,0 +1,75 @@
+---
+title: "Principal Component Analysis (PCA)"
+description: |
+  This PCA analysis explores the relationships and loadings between 18 countries and variables including elevation (> 1200 m above sea level), precipitation of coldest quarter (mm), precipitation of driest quarter (mm), and more.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-02-23
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+## Introduction:
+- This scaled PCA analysis explores the relationships and loadings between 18 countries and variables: elevation (> 1200 m above sea level), precipitation of coldest quarter (mm), precipitation of driest quarter (mm), precipitation of warmest quarter (mm), precipitation of wettest quarter (mm), mean temperature of coldest quarter (degC), mean temperature of driest quarter (degC), mean temperature of warmest quarter (degC), and mean temperature of wettest quarter (degC). Dataset is provided by @zander_venter on Kaggle with data obtained by Google Earth Engine. (More information at: https://www.kaggle.com/zanderventer/environmental-variables-for-world-countries/data & https://earthengine.google.com/)
+
+
+### Load packages
+```{r setup}
+library(tidyverse)
+library(janitor)
+library(here)
+library(readxl)
+library(ggfortify) # for PCA
+library(patchwork)
+```
+
+### Read in 'world_env_vars.csv'
+```{r, echo = TRUE, error = FALSE, warning=FALSE, message=FALSE}
+world_df <- read.csv(here("_posts", "2021-02-23-pca","world_env_vars.csv")) %>% 
+  clean_names()
+```
+
+### wrangling and PCA
+```{r,  echo = TRUE, error = FALSE, warning=FALSE, message=FALSE}
+world_pca <- world_df %>% 
+  select(elevation, ends_with("_quart")) %>%
+  filter(elevation > 1200) %>% 
+  drop_na() %>% 
+  scale() %>%
+  prcomp()
+
+world_pca
+
+world_complete <- world_df %>% 
+  drop_na(elevation, ends_with("_quart")) %>% 
+  filter(elevation > 1200)
+```
+
+### Biplot output
+```{r, fig.width= 10, echo = TRUE, error = FALSE, warning=FALSE, message=FALSE}
+autoplot(world_pca,
+         data = world_complete,
+         loadings = TRUE,
+         colour = 'country', alpha = 0.5,
+         loadings.label = TRUE,
+         loadings.colour = "black",
+         loadings.label.colour = "black",
+         loadings.label.vjust = -0.5
+         ) + 
+  scale_colour_discrete(name = "Country") +
+  theme_minimal() + 
+  theme(legend.position="none") +
+  geom_text(aes(label=country), col = "red", size = 3)
+
+#screeplot(world_pca, type = "lines")
+
+#world_pca$rotation
+```
+
+## Summary:
+- The analysis indicates mean temperature of driest quarter and mean temperature of warmest quarter are strongly positively correlated in multivariate space. 
+- Precipitation of warmest quarter is minimally correlated with elevation.
+- Lastly, elevation is negatively correlated to mean temperature of driest quarter, mean temperature of warmest quarter, and precipitation of coldest quarter. 
+- PCA analysis also indicates, overall, in multivariate space, countries Rwanda and Burundi are very similar -- as well as, countries such as Peru and Bolivia. 
