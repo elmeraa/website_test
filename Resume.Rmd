@@ -5,7 +5,7 @@ output:
   distill::distill_article
 ---
 ```{r echo = FALSE, message=FALSE, fig.align='center', fig.pos='H', out.width = "800px", out.height = "1100px"}
-knitr::include_graphics("./Azadpour_Elmera_Resume_Jan2021.pdf")
+knitr::include_graphics("./Azadpour_Elmera_Resume_git.pdf")
 ```
 
 ### Additional skills:
