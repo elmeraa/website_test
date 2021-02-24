@@ -1,0 +1,140 @@
+---
+title: "Binary Logistic Regression"
+description: |
+  Binary logistic regression of two dominant Palmetto species of south-central Florida from 1981 - 2017.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-02-23
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+## Load packages
+```{r setup}
+library(tidyverse)
+library(here)
+library(GGally)
+library(broom)
+library(jtools)
+library(kableExtra)
+```
+
+## Read in data {.tabset}
+```{r, warning =FALSE}
+palmetto <- read_csv(here("_posts", "2021-02-23-blrpalmetto", "palmetto.csv"), 
+                     col_types = cols(.default = "c")) %>%
+  mutate(height = as.numeric(height)) %>% 
+  mutate(species_name = case_when(
+    species == 1 ~ "Serenoa repens", 
+    species == 2 ~ "Sabal etonia")) %>% 
+  mutate(site_name = case_when(
+    site == 1 ~ "Copse Road", 
+    site == 2 ~ "Ridge Road",
+    site == 3 ~ "WSP2",
+    site == 4 ~ "WS30",
+    site == 5 ~ "WSP1",
+    site == 6 ~ "Red Hill"))  %>% 
+  mutate(width = as.integer(width)) %>% 
+  mutate(length = as.integer(length)) %>% 
+  mutate(green_lvs = as.integer(green_lvs))
+
+```
+
+## Data exploration between species 1 (*Serenoa* repens) and species 2 (*Sabal* etonia). {.tabset}
+```{r, warning=FALSE, fig.cap = "**Figure 1**. Species (Sabal etonia and Sernoa repens) vs canopy height (cm) by study site. Generally Sabal etonia tends to have higher canopy height than Serenoa repens across the sites."}
+ggplot(palmetto,
+       aes(x = species_name, y = height)) +
+  geom_boxplot(aes(fill = species_name)) +
+  facet_wrap(~ site_name) +
+  labs(x = "Species", y = "Canopy height (cm)") +
+  scale_fill_discrete(name = "Species") +
+  theme_light() +
+ theme(legend.position = "top")
+```
+## Graph 2 {.tabset}
+```{r, warning=FALSE, fig.cap = "**Figure 2**. Canopy width (cm) vs canopy height (cm) for both species (Sabal etonia and Serenoa repens). Trend indicates Sabal etonia trees tend to have more lower capopy width and higher canopy height as compared to Serenoa repens, however still lots of spread in the data."}
+ggplot(palmetto, aes(x = width, y = length)) +
+  geom_point(aes(color = species_name)) +
+  theme_minimal() +
+  labs(x = "Canopy width (cm)", y = "Canopy height (cm)") +
+  scale_color_discrete(name = "Species") +
+ theme(legend.position = "top")
+```
+
+## Binary logistic regression using plant height, canopy length, canopy width and green leaves as predictor variables to understand how they relate to probability of a plant being Serenoa repens or Sabal etonia {.tabset}
+```{r, warning=FALSE}
+palmetto_blr_ds <- palmetto %>% 
+  mutate(species_name = fct_drop(species_name)) %>% 
+  select(species_name, height, length, width, green_lvs) 
+  
+palmetto_blr <- glm(species_name ~ height + length + width + green_lvs ,
+                            data = palmetto_blr_ds, 
+                            family = "binomial")
+```
+
+## Look at outcome of blr model {.tabset}
+```{r, warning=FALSE}
+palmetto_blr #
+summary(palmetto_blr)
+
+# We can use the broom::tidy() function to get the model outputs in nice data frame format:
+palmetto_blr_tidy <- broom::tidy(palmetto_blr)
+
+# Get the intercept: 
+palmetto_int <- palmetto_blr_tidy$estimate[1]
+palmetto_int
+
+# Then to get the  coefficient:
+palmetto_coef <- palmetto_blr_tidy$estimate[2]
+palmetto_coef
+
+#What about getting some other model information (degrees of freedom, F-statistic, p-value, etc.)?
+#Many of these statistical outcomes can be accessed more easily using broom::glance().
+# Metrics at a glance: 
+palmetto_lm_out <- broom::glance(palmetto_blr)
+palmetto_lm_out
+
+## tidy model table output
+palmetto_blr_tidy %>% 
+  kable(col.names = c("Term",
+                      "Estimate",
+                      "St Error",
+                      "t-statistic",
+                      "p-value")) %>% 
+  kable_styling(full_width = FALSE)
+```
++ What does model output tell us? Output tells us that probabiliy of *Serenoa* repens species because its "1" in the levels. So we expect on average, that as canopy height increases, the odds of the species being *Serenoa* repens increases. With an increase in canopy length, the odds of the species being *Serenoa* repens decreases on average. Similarly with width, we expect that as canopy width increases, the odds of the species being *Serenoa* repens decreases. Lastly, on average as count of green leaves increases, we expect the odds of the species being *Serenoa* repens increases. 
+
+
+## Evaluates how successfully this model would “classify” a plant as the correct species, using a 50% cutoff (e.g. if the probability is >=50% that it is species A, then it would be classified as species A) {.tabset}
+```{r, warning=FALSE}
+palmetto_blr_fitted <- palmetto_blr %>% 
+  broom::augment(type.predict = "response") %>% 
+  mutate(classification = case_when(.fitted >=0.50 ~ "Serenoa repens", 
+      TRUE ~ "Sabal etonia")) 
+  
+
+palmetto_table <- palmetto_blr_fitted %>% 
+  select(species_name, .fitted, classification) %>% 
+  mutate(correct = case_when(
+      species_name == "Serenoa repens" & classification == "Serenoa repens" ~ "correct",
+      species_name == "Sabal etonia" & classification == "Sabal etonia" ~ "correct",
+      TRUE ~ "incorrect"))
+  
+  
+palmetto_summary_table <- palmetto_table %>% 
+  group_by(species_name, correct) %>% 
+  summarise(count = n()) %>% 
+  mutate(percentcorrect = (count / sum(count)*100))
+  
+
+palmetto_summary_table %>%  
+  kable(col.names = c("Species name",
+                      "Correct or incorrect model classification?",
+                      "Count",
+                      "% Correctly classified"), 
+        caption = "**Table 1**: summary statistics binary logistic regression analysis on palmetto dataset including species: Serenoa repens & Sabal etonia (data source: Abrahamson, W.G. 2019. Survival, growth and biomass estimates of two dominant palmetto species of south-central Florida from 1981 - 2017, ongoing at 5-year)") %>% 
+  kable_styling(full_width = FALSE) 
+```
