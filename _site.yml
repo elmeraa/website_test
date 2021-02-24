@@ -1,6 +1,6 @@
 name: "."
 title: "EA"
-theme: postcards.css
+theme: eatheme.css
 output_dir: "docs" 
 navbar:
   right:
@@ -10,6 +10,8 @@ navbar:
       href: Research.html
     - text: "Resume"
       href: Resume.html
+    - text: "Resources"
+      href: Resources.html
     - text: "Projects"      # add
       href: projects.html   # add
 output: 

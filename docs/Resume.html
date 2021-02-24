@@ -2118,6 +2118,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
   /* Optional: embed custom fonts here with `@import`          */
   /* This must remain at the top of this file.                 */
+  @import url('https://fonts.googleapis.com/css2?family=Roboto');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono');
 
 
 
@@ -2135,10 +2138,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     --aside-color:     rgba(0, 0, 0, 0.6);
     --fig-cap-color:   rgba(0, 0, 0, 0.6);
     /*-- Specify custom fonts ~~~ must be imported above   --*/
-    --heading-font:    sans-serif;
-    --mono-font:       monospace;
-    --body-font:       sans-serif;
-    --navbar-font:     sans-serif;  /* websites + blogs only */
+    --heading-font:    "Montserrat", serif;
+    --mono-font:       "Roboto", monospace;
+    --body-font:       "Roboto", sans-serif;
+    --navbar-font:     "Montserrat", serif;
   }
 
   /*-- ARTICLE METADATA --*/
@@ -2167,11 +2170,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   /* These properties only apply to Distill sites and blogs  */
 
   .distill-site-header {
-    --title-size:       18px;
-    --text-color:       rgba(255, 255, 255, 0.8);
+    --title-size:       18px;    
+    --text-color:       #FDFEFE; /* edited */
     --text-size:        15px;
-    --hover-color:      white;
-    --bkgd-color:       #0F2E3D;
+    --hover-color:      #7DCEA0; /* edited */
+    --bkgd-color:       #1E8449; /* edited */
   }
 
   .distill-site-footer {
@@ -2374,6 +2377,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <a href="index.html">Home</a>
 <a href="Research.html">Research</a>
 <a href="Resume.html">Resume</a>
+<a href="Resources.html">Resources</a>
 <a href="projects.html">Projects</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -2395,6 +2399,27 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="layout-chunk" data-layout="l-body">
 <embed src="./Azadpour_Elmera_Resume_Jan2021.pdf" width="800px" height="1100px" style="display: block; margin: auto;" type="application/pdf" />
 </div>
+<h3 id="additional-skills">Additional skills:</h3>
+<ul>
+<li>JMP statistical software</li>
+<li>Canva</li>
+<li>Land Surface Modelling (ELM-FATES)</li>
+<li>Statistical Analyses (Linear mixed effect models, PCA, chi-square, text sentiment analysis, ANOVA)</li>
+<li>Stable Isotope (δ15N, δ13C) biogeochemistry</li>
+</ul>
+<h3 id="presentationsconferences">Presentations/Conferences:</h3>
+<ul>
+<li>December 2020, Poster Presentation at American Geophysical Union (AGU) Conference, San Fransisco, CA: The effect of rainfall gradients on gross primary productivity (GPP) across the Isthmus of Panama*</li>
+<li>August 2020, Poster Presentation at Ecological Society of America (ESA) Conference, Salt Lake City, UT: “Constraints on Global Photosynthetic Capacity (Vcmax) Within Canopies”*</li>
+<li>July 2020, The Institut Pierre-Simon Laplace (IPSL), Climate Change: Challenges and Issues for the Earth Sciences, Paris, France</li>
+<li>February 2020, Berkeley Atmospheric Sciences Center (BASC) Symposium, Berkeley, CA</li>
+<li>December 2019, Poster Presentation at AGU Conference, San Francisco, CA: “Constraints on Global Photosynthetic Capacity (Vcmax) Within Canopies”</li>
+</ul>
+<h3 id="dataset-citation">Dataset Citation:</h3>
+<ul>
+<li>Powell T; <strong>Azadpour E</strong>; Faybishenko B (2020): Wind speed data from NCEI Marcos A Gelabert station, Panama, Jan 2008 – Dec 2019. 1.0. NGEE Tropics Data Collection. (dataset). <a href="http://dx.doi.org/10.15486/ngt/1633769" class="uri">http://dx.doi.org/10.15486/ngt/1633769</a></li>
+</ul>
+<p><a href="https://github.com/allisonhorst/stats-illustrations/tree/master/rstats-artwork"><img src="RStudio-ah.gif" /></a></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
