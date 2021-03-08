@@ -1,0 +1,68 @@
+---
+title: "Species Richness of Cetaceans along Coastal California"
+description: |
+  Raster of species richness of cetacean species off the coast of California utlizing a probability threshold.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-03-07
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/244-Assignment3 
++ you will find the cetacean data in the "data" folder
++ you will find the Rmd and html files as "a3-task2" in the "src" folder
+
+### Load Packages
+```{r setup}
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(raster)
+library(fasterize)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
+```
+
+### Read in data and stack files
+```{r}
+cetacean <-  list.files(here("_posts", "2021-03-07-cetacean-richness","ca_cetaceans"), full.names = TRUE)
+cetacean_raster <- stack(cetacean)
+cetacean_raster
+plot(cetacean_raster)
+```
+
+### Apply probability threshold (of 0.6 or greater) to determine presence or non-presence
+```{r}
+aquamap_fun <- function(x, thresh = 0.6){
+  y <- ifelse(x >= thresh, 1, 0)
+  return(y)
+}
+
+aquamap <- calc(cetacean_raster, fun = aquamap_fun)
+species_richness1 <- calc(aquamap, fun = sum, na.rm = TRUE)
+plot(species_richness1)
+```
+
+### Converting to dataframe and plotting
+```{r, fig.cap= "**Fig. 1** Species Richness of 16 Cetacean Species along the Coast of California. Presence of Cetacean species was determined with with a probability threshold of 0.6 or greater."}
+aquamap_df <- raster::rasterToPoints(species_richness1) %>% 
+  as.data.frame()
+
+states110 <- ne_download(scale = 110, type = 'states', category = 'cultural', returnclass = "sf") %>% filter(name %in% c("California"))
+
+ggplot() +
+geom_raster(data = aquamap_df, aes(x=x,y=y, fill = layer)) +
+  geom_sf(data = states110) +
+  scale_fill_gradient2(low = "red", mid = "white", high = "blue") +
+  labs(x = "Longitude", y = "Latitude", title = "Species Richness of Cetaceans along Coastal California", fill = "Number of Cetacean Species") +
+  theme_classic()
+```
+
+### Citation:
++ Kaschner, K., Rius-Barile, J., Kesner-Reyes, K., Garilao, C., Kullander, S., Rees, T., & Froese, R. (2016). AquaMaps: Predicted range maps for aquatic species. www.aquamaps.org

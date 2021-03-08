@@ -20,6 +20,11 @@ library(pdftools)
 library(ggwordcloud)
 ```
 
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/244-Assignment3 
++ you will find the Origin of Species pdf in the "data" folder
++ you will find the Rmd and html files as "a3-task3" in the "src" folder
+
 ## Read in the Origin of Species, 6th Edition by Darwin 
 ```{r, warning=FALSE}
 os_text <- pdf_text(here("_posts", "2021-02-23-text-wrangling-and-analysis", "originofspecies6th-darwin.pdf"))

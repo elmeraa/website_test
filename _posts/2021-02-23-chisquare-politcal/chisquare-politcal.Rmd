@@ -19,6 +19,11 @@ library(broom)
 library(kableExtra)
 ```
 
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/206-assignment6
++ you will find survey data in the "data" folder
++ you will find the Rmd and html files as "a6-task2" in the "src" folder
+
 ## Introduction:
 This task analyzes the association between respondents’ political affiliation (coined “conservative” or “liberal” by self-identification) and if they consider themself an environmentalist. The variables in the dataset (conservation_survey.csv) I have used include:
 

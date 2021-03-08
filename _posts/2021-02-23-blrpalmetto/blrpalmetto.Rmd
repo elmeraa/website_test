@@ -11,6 +11,11 @@ output:
     self_contained: false
 ---
 
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/244-assignment2
++ you will find palmetto data in the "data" folder
++ you will find the Rmd and html files as "a2-task2" in the "src" folder
+
 ## Load packages
 ```{r setup}
 library(tidyverse)

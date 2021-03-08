@@ -11,6 +11,12 @@ output:
     self_contained: false
 ---
 
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/244-Assignment1
++ you will find world countries data in the "data" folder
++ you will find the Rmd and html files as "a1-task2" in the "src" folder
+
+
 ## Introduction:
 - This scaled PCA analysis explores the relationships and loadings between 18 countries and variables: elevation (> 1200 m above sea level), precipitation of coldest quarter (mm), precipitation of driest quarter (mm), precipitation of warmest quarter (mm), precipitation of wettest quarter (mm), mean temperature of coldest quarter (degC), mean temperature of driest quarter (degC), mean temperature of warmest quarter (degC), and mean temperature of wettest quarter (degC). Dataset is provided by @zander_venter on Kaggle with data obtained by Google Earth Engine. (More information at: https://www.kaggle.com/zanderventer/environmental-variables-for-world-countries/data & https://earthengine.google.com/)
 
