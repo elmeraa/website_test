@@ -1,0 +1,169 @@
+---
+title: "Two Sample T-Test"
+description: |
+  Regression, two sample t-test, and chi-square analysis of two species of sea turtles in Shark Bay, Australia .
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-03-31
+output:
+  distill::distill_article:
+    self_contained: false
+---
+## Load Packages:
+```{r setup}
+library(tidyverse)
+library(here)
+library(broom)
+library(effsize)
+library(janitor)
+library(kableExtra)
+```
+
+### To access data, html and Rmd files: 
++ https://github.com/elmeraa/elmera-azadpour-206-final
++ you will find the sharkbay sea turtles data in the "exam_data" folder
++ you will find the Rmd and html files as "azadpour_turtles" in the "task_code" folder
+
+## Read in sea turtles data (source: Environmental Data Initiative)
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include = FALSE}
+sea_turtles <- read_csv(here("_posts", "2021-03-31-two-sample-t-test", "sharkbay_sea_turtles.csv")) 
+sea_turtles_clean <- sea_turtles %>% 
+  select(species, length, width, burr)
+```
+
+## Exploratory visualization
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+ggplot(sea_turtles_clean, aes(x = length,
+                              y= width)) +
+  geom_point() +
+  theme_minimal()+
+  labs(x ="Curved carapace length at midline (cm)", 
+  y = "Curved carapace width at widest point (cm)")
+```
+
+## Linear Regression 
+```{r, error=FALSE, warning=FALSE, message=FALSE, echo=FALSE, include = FALSE}
+## linear regression 
+turtles_lm <- lm(length ~ width, data = sea_turtles_clean)
+
+# Return the complete overview:
+summary(turtles_lm)
+
+# We can use the broom::tidy() function to get the model outputs in nice data frame format:
+turtles_lm_tidy <- broom::tidy(turtles_lm)
+
+# Get the intercept: 
+turtles_int <- turtles_lm_tidy$estimate[1]
+turtles_int
+
+# Then to get the flipper_length coefficient:
+turtles_coef <- turtles_lm_tidy$estimate[2]
+turtles_coef
+
+
+#What about getting some other model information (degrees of freedom, F-statistic, p-value, etc.)?
+#Many of these statistical outcomes can be accessed more easily using broom::glance().
+# Metrics at a glance: 
+turtles_lm_out <- broom::glance(turtles_lm)
+turtles_lm_out
+
+
+# Explore model assumptions
+plot(turtles_lm)
+
+# Pearson’s r
+turtles_cor <- cor.test(sea_turtles_clean$length, sea_turtles_clean$width)
+turtles_cor
+```
+### Regression summary of sea turtle curved carapace length and width at midline (cm).
+- Simple linear regression was used to explore the relationship between sea turtles curved carapace length at midline (cm) and curved carapace width at widest point (cm) across two sea turtle species: green or loggerhead. A significant regression model was found ($\beta$ = `r round(turtles_coef,3)`, F(`r turtles_lm_out$df`,`r turtles_lm_out$df.residual`) = `r round(turtles_lm_out$statistic,1)`, p < 0.001) with an R^2^ of `r round(turtles_lm_out$r.squared,3)`.
+
+### Comparing carapace lengths between green and loggerhead turtles
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+## Lets just look at the raw data 
+#ggplot(data = sea_turtles_clean, aes(x = species, y = length)) + geom_boxplot(aes(col=species))
+# not very different.. 
+
+# Histograms
+ggplot(data = sea_turtles_clean, aes(x = length)) +
+  geom_histogram(bins = 15) +
+  facet_wrap(~species, scales = "free")
+
+# QQ Plots
+ggplot(data= sea_turtles_clean, aes(sample = length)) +
+  geom_qq() +
+  facet_wrap(~species)
+```
+
+## Two sample t-test
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include = FALSE}
+# two sample t-test
+turtle_length_green <- sea_turtles_clean %>% 
+  select(c("length", "species")) %>% 
+  filter(species == "green") %>% 
+  pull(length)
+
+turtle_length_loggerhead<- sea_turtles_clean %>% 
+  select(c("length", "species")) %>% 
+  filter(species == "loggerhead") %>% 
+  pull(length)
+
+ttest <-t.test(turtle_length_green, turtle_length_loggerhead)
+ttest_tidy <- tidy(ttest)
+
+#turtles_clean_table <- sea_turtles_clean %>% 
+#group_by(species) %>% 
+  #summarise(mean_length = mean(length, na.rm=T),
+            #sd_length = sd(length, na.rm=T),
+            #n = n())
+
+# cohens d/ effect size
+cohen_test <- cohen.d(turtle_length_green, turtle_length_loggerhead, na.rm = TRUE)
+```
+
+### Two sample t-test conclusions:
+- I used a two-sample t-test because I wanted to compare differences between 2 groups (turtle species) and compare means (continuous data) of curved carapace lengths. 
+- This analysis indicates green sea turtles had a larger mean (92.64 ± 15.78, *n* = 188; mean ± 1 standard deviation), compares to loggerhead sea turtles which had a smaller mean (89.92 ± 11.44, *n* = 95; mean ± 1 standard deviation). The actual difference in means from green and loggerhead sea turtles is 2.72. The outcome of the two sample t-test indicated that there is somewhat strong chance of (*p* > 0.001) of randomly selecting two samples from populations with the same that are this difference by change. In sum, the difference in means is significant (Welch’s two-sample t-test: t(`r round(ttest_tidy$parameter,2)`) = `r round(ttest_tidy$statistic,2)`, *p*-value = `r format(ttest_tidy$p.value, scientific = TRUE, digits = 3)`) and the effect size is negligible (Cohen's *d* = `r round(cohen_test$estimate,2)`).
+
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+## Finalized table that shows counts and proportions of presence of burrowing barnacles to sea turtle species"
+sea_turtles_burr <- sea_turtles_clean %>%  
+  select(species, burr)
+
+burr_counts <- sea_turtles_burr %>% 
+  janitor::tabyl(species, burr)
+
+burr_proportions <- burr_counts %>% 
+  adorn_percentages() %>% 
+  janitor::adorn_pct_formatting(digits = 2) %>% 
+  adorn_ns() %>% 
+  drop_na()
+
+burr_ct <- burr_proportions %>% 
+  column_to_rownames(var = "species")
+
+burr_ct %>%  
+  kable(col.names = c("No",
+                      "Yes"),
+    caption = "**Table 1**: Association between sea turtle species and presence of burrowing barnacles") %>% 
+  kable_styling(full_width = FALSE)
+```
+
+## Chi-square test for independence
+```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include=FALSE}
+## Chi-square test
+burr_ct <- burr_counts %>%   
+  drop_na() %>% 
+  column_to_rownames(var = "species")
+  
+survey_x2 <- chisq.test(burr_ct)
+survey_x2
+
+survey_tidy <- tidy(survey_x2)
+```
+### Chi-square results and summary
+A chi-square test for independence compares two variables in a contingency table to see if they are related. In a more general sense, it tests to see whether distributions of categorical variables differ from each another. For this analysis, there is a significant association (i.e. non-independence) between sea turtle species and and the presence of burrowing barnacles ($\chi$^2^(`r survey_tidy$parameter`) = `r round(survey_tidy$statistic,2)`, *p*-value = `r format(survey_tidy$p.value, scientific = TRUE, digits = 3)`). 
+
+### Sea turtle data source:
+- Heithaus, M. and J. Thomson. 2019. Marine turtles captured during haphazard at-sea surveys in Shark Bay, Australia from February 2008 to December 2013 ver 4. Environmental Data Initiative. https://doi.org/10.6073/pasta/7696e20214fbf84f25d664ff7dc8050c
