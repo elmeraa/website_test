@@ -1,0 +1,157 @@
+---
+title: "Plastic Pollution: TidyTuesday"
+description: |
+  A short description of the post.
+author:
+  - name: Elmera Azadpour
+    url: {}
+date: 2021-03-31
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+## Read in data from 'tidytuesdayR' package
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidytuesdayR)
+library(tidyverse)
+library(plotly)
+library(fs)
+library(janitor)
+library(patchwork)
+library(lubridate)
+library(magick)
+library(here)
+library(grid)
+library(cowplot)
+library(magrittr)
+```
+
+## Get the Data
+```{r}
+# Read in with tidytuesdayR package 
+# Install from CRAN via: install.packages("tidytuesdayR")
+# This loads the readme and all the datasets for the week of interest
+
+# Either ISO-8601 date or year/week works!
+
+tuesdata <- tidytuesdayR::tt_load('2021-01-26')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
+
+plastics <- tuesdata$plastics
+
+# Or read in the data manually, up to you: 
+#plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv') %>% tolower()
+
+```
+
+## Data cleaning and wrangling to get top 5 Coca Cola Polluters of 2020
+```{r}
+plastics_2020 <- plastics %>% 
+  select(country, year, parent_company, pet) %>% 
+  filter(year == 2020 & parent_company == "The Coca-Cola Company") %>% 
+  group_by(country) %>% 
+  summarize(count = sum(pet)) %>%
+  slice_max(count, n = 5) %>% 
+  transform(country = reorder(country, order(count, decreasing = TRUE)))
+```
+
+## Custom theming 
+```{r}
+#Define gppr_theme() function
+
+theme_gppr <- function(){ 
+    font <- "Palatino"   #assign font family up front
+    
+    theme_minimal() %+replace%    #replace elements we want to change
+    
+    theme(
+      
+      #grid elements
+      panel.grid.major = element_blank(),    #strip major gridlines
+      panel.grid.minor = element_blank(),    #strip minor gridlines
+      axis.ticks = element_blank(),          #strip axis ticks
+      
+      #since theme_minimal() already strips axis lines, 
+      #we don't need to do that again
+      
+      #text elements
+      plot.title = element_text(             #title
+                   family = font,            #set font family
+                   size = 20,                #set font size
+                   face = 'bold',            #bold typeface
+                   hjust = 0,                #left align
+                   vjust = 1),               #raise slightly
+      
+      plot.subtitle = element_text(          #subtitle
+                   family = font,            #font family
+                   size = 18),               #font size
+      
+      plot.caption = element_text(           #caption
+                   family = font,            #font family
+                   size = 14,                 #font size
+                   hjust = 1),               #right align
+      
+      axis.title = element_text(             #axis titles
+                   family = font,            #font family
+                   size = 18),               #font size
+      
+      axis.text = element_text(              #axis text
+                   family = font,            #axis famuly
+                   size = 18),                #font size
+      
+      axis.text.x = element_text(            #margin for axis text
+                    margin=margin(5, b = 8)),
+      
+      legend.position = "none"
+      
+      #since the legend often requires manual tweaking 
+      #based on plot content, don't define it here
+    )
+}
+```
+
+
+## Top 5 Coke polluting countires in 2020 with logo 
+```{r}
+ plot <- ggplot(data = plastics_2020, aes (x = country, y = count)) +
+  geom_bar(aes(fill = country), stat = 'identity') + 
+  labs(x = "Country", 
+       y = "Polyester plastic count", 
+       title = "Top 5 countries in 2020 with highest The Coca-Cola Company polyester \nplastic count",
+       caption = "Source: Break Free from Plastic, \ncourtesy of Sarah Sauve \n #TidyTuesday ") +
+  scale_fill_brewer(palette = "Dark2") +
+  geom_text(
+        aes(label = paste(count), #add label
+            vjust=-0.5,                             #adjust positioning
+            family = 'Georgia'),                    #font family
+        size = 5)+
+  theme_gppr() 
+
+ggsave("plastics-a3-elmera-azadpour.png", width = 12, height = 9, units = "in", dpi = 72)
+
+## sourced from https://themockup.netlify.app/posts/2019-01-09-add-a-logo-to-your-plot/
+pub_plot <- image_read(here("_posts", "2021-03-31-plastic-pollution-tidytuesday", "plastics-a3-elmera-azadpour.png"))
+#print(pub_plot)
+logo <- image_read(here("_posts", "2021-03-31-plastic-pollution-tidytuesday", "plasticlogo.png"))
+logo <- image_scale(logo, "230")
+print(logo)
+
+# get dims of the plot
+plot_height <- magick::image_info(pub_plot)$height
+plot_width <- magick::image_info(pub_plot)$width
+
+# get dims of the logo
+logo_width <-  magick::image_info(logo)$width
+logo_height <- magick::image_info(logo)$height
+
+# get number of pixels to be 1% from the bottom of the plot
+# while accounting for the logo height
+plot_height - logo_height - plot_height * 0.01 #606.52
+
+plot_width * 0.01 #8.64
+
+pub_plot %>% 
+  image_composite(logo, offset = "+8.642+606.52")
+```

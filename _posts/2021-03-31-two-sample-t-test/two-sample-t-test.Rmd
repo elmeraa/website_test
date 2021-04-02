@@ -26,14 +26,14 @@ library(kableExtra)
 + you will find the Rmd and html files as "azadpour_turtles" in the "task_code" folder
 
 ## Read in sea turtles data (source: Environmental Data Initiative)
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include = FALSE}
+```{r}
 sea_turtles <- read_csv(here("_posts", "2021-03-31-two-sample-t-test", "sharkbay_sea_turtles.csv")) 
 sea_turtles_clean <- sea_turtles %>% 
   select(species, length, width, burr)
 ```
 
 ## Exploratory visualization
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+```{r}
 ggplot(sea_turtles_clean, aes(x = length,
                               y= width)) +
   geom_point() +
@@ -43,7 +43,7 @@ ggplot(sea_turtles_clean, aes(x = length,
 ```
 
 ## Linear Regression 
-```{r, error=FALSE, warning=FALSE, message=FALSE, echo=FALSE, include = FALSE}
+```{r}
 ## linear regression 
 turtles_lm <- lm(length ~ width, data = sea_turtles_clean)
 
@@ -80,7 +80,7 @@ turtles_cor
 - Simple linear regression was used to explore the relationship between sea turtles curved carapace length at midline (cm) and curved carapace width at widest point (cm) across two sea turtle species: green or loggerhead. A significant regression model was found ($\beta$ = `r round(turtles_coef,3)`, F(`r turtles_lm_out$df`,`r turtles_lm_out$df.residual`) = `r round(turtles_lm_out$statistic,1)`, p < 0.001) with an R^2^ of `r round(turtles_lm_out$r.squared,3)`.
 
 ### Comparing carapace lengths between green and loggerhead turtles
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+```{r}
 ## Lets just look at the raw data 
 #ggplot(data = sea_turtles_clean, aes(x = species, y = length)) + geom_boxplot(aes(col=species))
 # not very different.. 
@@ -97,7 +97,7 @@ ggplot(data= sea_turtles_clean, aes(sample = length)) +
 ```
 
 ## Two sample t-test
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include = FALSE}
+```{r}
 # two sample t-test
 turtle_length_green <- sea_turtles_clean %>% 
   select(c("length", "species")) %>% 
@@ -126,7 +126,7 @@ cohen_test <- cohen.d(turtle_length_green, turtle_length_loggerhead, na.rm = TRU
 - I used a two-sample t-test because I wanted to compare differences between 2 groups (turtle species) and compare means (continuous data) of curved carapace lengths. 
 - This analysis indicates green sea turtles had a larger mean (92.64 ± 15.78, *n* = 188; mean ± 1 standard deviation), compares to loggerhead sea turtles which had a smaller mean (89.92 ± 11.44, *n* = 95; mean ± 1 standard deviation). The actual difference in means from green and loggerhead sea turtles is 2.72. The outcome of the two sample t-test indicated that there is somewhat strong chance of (*p* > 0.001) of randomly selecting two samples from populations with the same that are this difference by change. In sum, the difference in means is significant (Welch’s two-sample t-test: t(`r round(ttest_tidy$parameter,2)`) = `r round(ttest_tidy$statistic,2)`, *p*-value = `r format(ttest_tidy$p.value, scientific = TRUE, digits = 3)`) and the effect size is negligible (Cohen's *d* = `r round(cohen_test$estimate,2)`).
 
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE}
+```{r}
 ## Finalized table that shows counts and proportions of presence of burrowing barnacles to sea turtle species"
 sea_turtles_burr <- sea_turtles_clean %>%  
   select(species, burr)
@@ -151,7 +151,7 @@ burr_ct %>%
 ```
 
 ## Chi-square test for independence
-```{r, echo = FALSE, error = FALSE, warning=FALSE, message=FALSE, include=FALSE}
+```{r}
 ## Chi-square test
 burr_ct <- burr_counts %>%   
   drop_na() %>% 
