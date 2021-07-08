@@ -1,0 +1,12 @@
+---
+title: "CV"
+image: false
+output: 
+  distill::distill_article
+---
+```{r echo = FALSE, message=FALSE, fig.align='center', fig.pos='H', out.width = "800px", out.height = "1100px"}
+knitr::include_graphics("./Azadpour_Elmera_CV_July21.pdf")
+```
+
+
+[![](RStudio-ah.gif)](https://github.com/allisonhorst/stats-illustrations/tree/master/rstats-artwork)
